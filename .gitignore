@@ -1,0 +1,26 @@
+# Python
+.venv/
+__pycache__/
+.pytest_cache/
+
+# Terraform: state and plans hold key material
+.terraform/
+*.tfstate*
+*.tfplan
+*.tfvars
+.build/
+
+# Secrets and local environment
+.env
+state.env
+*.pem
+*.key
+secrets/
+
+# Private working notes (account details, paths, spend)
+CLAUDE.md
+CLAUDE.local.md
+.claude/
+.mcp.json
+PLAN_AWS.md
+PLAN_AWS_1REGION.md

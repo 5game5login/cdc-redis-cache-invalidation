@@ -1,0 +1,113 @@
+{
+ "soak-failover-1": {
+  "first_writer_error_s": 12.31,
+  "writer_error_types": [
+   "OperationalError"
+  ],
+  "debezium_noticed_s": 18.5,
+  "events": [
+   {
+    "s_after_failover_call": 18.5,
+    "debezium": "ERROR Postgres|dbserver2|streaming Producer failure"
+   },
+   {
+    "s_after_failover_call": 18.8,
+    "debezium": "WARN || Going to restart connector after 10 sec. after a retriable exception"
+   },
+   {
+    "s_after_failover_call": 28.8,
+    "debezium": "INFO || Attempting to restart task."
+   },
+   {
+    "s_after_failover_call": 29.3,
+    "debezium": "INFO Postgres|dbserver2|snapshot Snapshot ended with SnapshotResult status=SKIPPED"
+   },
+   {
+    "s_after_failover_call": 29.7,
+    "debezium": "INFO Postgres|dbserver2|streaming Searching for WAL resume position"
+   },
+   {
+    "s_after_failover_call": 29.7,
+    "debezium": "INFO Postgres|dbserver2|streaming WAL resume position 'LSN{0/42734F0}' discovered"
+   },
+   {
+    "s_after_failover_call": 29.8,
+    "debezium": "INFO Postgres|dbserver2|streaming Processing messages"
+   }
+  ]
+ },
+ "soak-failover-2-tuned": {
+  "first_writer_error_s": 9.18,
+  "writer_error_types": [
+   "OperationalError"
+  ],
+  "debezium_noticed_s": 17.7,
+  "events": [
+   {
+    "s_after_failover_call": 17.7,
+    "debezium": "ERROR Postgres|dbserver2|streaming Producer failure"
+   },
+   {
+    "s_after_failover_call": 17.7,
+    "debezium": "WARN || Going to restart connector after 1 sec. after a retriable exception"
+   },
+   {
+    "s_after_failover_call": 18.8,
+    "debezium": "INFO || Attempting to restart task."
+   },
+   {
+    "s_after_failover_call": 19.4,
+    "debezium": "INFO Postgres|dbserver2|snapshot Snapshot ended with SnapshotResult status=SKIPPED"
+   },
+   {
+    "s_after_failover_call": 19.8,
+    "debezium": "INFO Postgres|dbserver2|streaming Searching for WAL resume position"
+   },
+   {
+    "s_after_failover_call": 19.8,
+    "debezium": "INFO Postgres|dbserver2|streaming WAL resume position 'LSN{0/4610460}' discovered"
+   },
+   {
+    "s_after_failover_call": 19.9,
+    "debezium": "INFO Postgres|dbserver2|streaming Processing messages"
+   }
+  ]
+ },
+ "soak-failover-3-status1s": {
+  "first_writer_error_s": 12.68,
+  "writer_error_types": [
+   "OperationalError"
+  ],
+  "debezium_noticed_s": 13.1,
+  "events": [
+   {
+    "s_after_failover_call": 13.1,
+    "debezium": "ERROR Postgres|dbserver2|streaming Producer failure"
+   },
+   {
+    "s_after_failover_call": 13.1,
+    "debezium": "WARN || Going to restart connector after 1 sec. after a retriable exception"
+   },
+   {
+    "s_after_failover_call": 14.2,
+    "debezium": "INFO || Attempting to restart task."
+   },
+   {
+    "s_after_failover_call": 14.7,
+    "debezium": "INFO Postgres|dbserver2|snapshot Snapshot ended with SnapshotResult status=SKIPPED"
+   },
+   {
+    "s_after_failover_call": 15.1,
+    "debezium": "INFO Postgres|dbserver2|streaming Searching for WAL resume position"
+   },
+   {
+    "s_after_failover_call": 15.2,
+    "debezium": "INFO Postgres|dbserver2|streaming WAL resume position 'LSN{0/494E558}' discovered"
+   },
+   {
+    "s_after_failover_call": 15.4,
+    "debezium": "INFO Postgres|dbserver2|streaming Processing messages"
+   }
+  ]
+ }
+}

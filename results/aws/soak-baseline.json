@@ -1,0 +1,94 @@
+{
+  "run": "soak-20261121-234554",
+  "ok": true,
+  "problems": [],
+  "failover": {},
+  "before": {
+    "a": {
+      "side": "a",
+      "cache_epoch": "1",
+      "connector": "RUNNING/RUNNING",
+      "topic": "dbserver2.public.products",
+      "slot": "debezium_slot_e1",
+      "slots": [
+        {
+          "slot": "debezium_slot_e1",
+          "active": true,
+          "wal_status": "reserved",
+          "confirmed_flush_lsn": "0/415AD30"
+        }
+      ],
+      "worker": "running"
+    },
+    "b": {
+      "side": "b",
+      "cache_epoch": "1",
+      "connector": "n/a",
+      "topic": "dbserver2.public.products",
+      "slot": "debezium_slot_e1",
+      "slots": [],
+      "worker": "running"
+    }
+  },
+  "after": {
+    "a": {
+      "side": "a",
+      "cache_epoch": "1",
+      "connector": "RUNNING/RUNNING",
+      "topic": "dbserver2.public.products",
+      "slot": "debezium_slot_e1",
+      "slots": [
+        {
+          "slot": "debezium_slot_e1",
+          "active": true,
+          "wal_status": "reserved",
+          "confirmed_flush_lsn": "0/41DD988"
+        }
+      ],
+      "worker": "running"
+    },
+    "b": {
+      "side": "b",
+      "cache_epoch": "1",
+      "connector": "n/a",
+      "topic": "dbserver2.public.products",
+      "slot": "debezium_slot_e1",
+      "slots": [],
+      "worker": "running"
+    }
+  },
+  "summary": {
+    "keys": 1204,
+    "acked_commits": 1640,
+    "acked_inserts": 1204,
+    "write_errors": 0,
+    "gave_up": 0,
+    "db_missing": 0,
+    "longest_write_pause_s": 0.04,
+    "duration_s": 30.1,
+    "a": {
+      "keys": 1204,
+      "mismatched": 0,
+      "absent": 0,
+      "mismatched_sample": [],
+      "converge_after_last_write_s": 0.67,
+      "lag_samples": 1204,
+      "lag_p50_ms": 606.8,
+      "lag_p99_ms": 1059.0,
+      "lag_max_s": 1.11,
+      "longest_cache_pause_s": 1.0
+    },
+    "b": {
+      "keys": 1204,
+      "mismatched": 0,
+      "absent": 0,
+      "mismatched_sample": [],
+      "converge_after_last_write_s": 2.41,
+      "lag_samples": 1204,
+      "lag_p50_ms": 607.1,
+      "lag_p99_ms": 1062.4,
+      "lag_max_s": 1.13,
+      "longest_cache_pause_s": 0.99
+    }
+  }
+}

@@ -1,0 +1,37 @@
+# MirrorMaker 2, A -> B only. @KAFKA_PRIVATELINK_HOST@ is replaced by cdcctl.sh.
+clusters = A, B
+A.bootstrap.servers = @KAFKA_PRIVATELINK_HOST@:9094
+A.security.protocol = SSL
+A.ssl.keystore.type = PEM
+A.ssl.keystore.location = /etc/kafka/secrets/client.pem
+A.ssl.truststore.type = PEM
+A.ssl.truststore.location = /etc/kafka/secrets/ca.pem
+A.ssl.endpoint.identification.algorithm = https
+B.bootstrap.servers = kafka:9092
+
+A->B.enabled = true
+B->A.enabled = false
+A->B.topics = dbserver[0-9]+\\.public\\.products
+# Same topic name on both sides: both workers run with identical config.
+replication.policy.class = org.apache.kafka.connect.mirror.IdentityReplicationPolicy
+tasks.max = 2
+
+# A is strictly read-only for us: nothing below may write to A.
+offset-syncs.topic.location = target
+emit.heartbeats.enabled = false
+emit.checkpoints.enabled = false
+sync.group.offsets.enabled = false
+sync.topic.acls.enabled = false
+sync.topic.configs.enabled = false
+
+refresh.topics.interval.seconds = 5
+replication.factor = 1
+checkpoints.topic.replication.factor = 1
+heartbeats.topic.replication.factor = 1
+offset-syncs.topic.replication.factor = 1
+config.storage.replication.factor = 1
+offset.storage.replication.factor = 1
+status.storage.replication.factor = 1
+# Low latency: do not wait to fill fetches
+A.consumer.fetch.max.wait.ms = 100
+A.consumer.auto.offset.reset = earliest

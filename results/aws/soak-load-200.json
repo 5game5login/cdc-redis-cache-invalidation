@@ -1,0 +1,150 @@
+{
+  "run": "soak-20261122-142737",
+  "ok": true,
+  "problems": [],
+  "failover": {},
+  "before": {
+    "a": {
+      "side": "a",
+      "cache_epoch": "1",
+      "connector": "RUNNING/RUNNING",
+      "topic": "dbserver2.public.products",
+      "slot": "debezium_slot_e1",
+      "slots": [
+        {
+          "slot": "debezium_slot_e1",
+          "active": true,
+          "wal_status": "reserved",
+          "confirmed_flush_lsn": "0/6102740"
+        }
+      ],
+      "worker": "running"
+    },
+    "b": {
+      "side": "b",
+      "cache_epoch": "1",
+      "connector": "n/a",
+      "topic": "dbserver2.public.products",
+      "slot": "debezium_slot_e1",
+      "slots": [],
+      "worker": "running"
+    }
+  },
+  "after": {
+    "a": {
+      "side": "a",
+      "cache_epoch": "1",
+      "connector": "RUNNING/RUNNING",
+      "topic": "dbserver2.public.products",
+      "slot": "debezium_slot_e1",
+      "slots": [
+        {
+          "slot": "debezium_slot_e1",
+          "active": true,
+          "wal_status": "reserved",
+          "confirmed_flush_lsn": "0/6735278"
+        }
+      ],
+      "worker": "running"
+    },
+    "b": {
+      "side": "b",
+      "cache_epoch": "1",
+      "connector": "n/a",
+      "topic": "dbserver2.public.products",
+      "slot": "debezium_slot_e1",
+      "slots": [],
+      "worker": "running"
+    }
+  },
+  "summary": {
+    "keys": 24020,
+    "acked_commits": 33388,
+    "acked_inserts": 24020,
+    "write_errors": 0,
+    "gave_up": 0,
+    "db_missing": 0,
+    "longest_write_pause_s": 0.06,
+    "duration_s": 120.1,
+    "a": {
+      "keys": 24020,
+      "mismatched": 0,
+      "absent": 0,
+      "mismatched_sample": [],
+      "converge_after_last_write_s": 1.03,
+      "lag_samples": 24020,
+      "lag_p50_ms": 83.5,
+      "lag_p99_ms": 152.9,
+      "lag_max_s": 0.31,
+      "longest_cache_pause_s": 0.16
+    },
+    "b": {
+      "keys": 24020,
+      "mismatched": 0,
+      "absent": 0,
+      "mismatched_sample": [],
+      "converge_after_last_write_s": 4.23,
+      "lag_samples": 24020,
+      "lag_p50_ms": 88.0,
+      "lag_p99_ms": 162.4,
+      "lag_max_s": 0.29,
+      "longest_cache_pause_s": 0.17
+    }
+  },
+  "stages": {
+    "events": 24020,
+    "acked": 24020,
+    "ack_to_debezium": {
+      "n": 24020,
+      "p50_ms": 0.2,
+      "p99_ms": 49.9
+    },
+    "debezium_to_kafka": {
+      "n": 24020,
+      "p50_ms": 25.5,
+      "p99_ms": 50.5
+    },
+    "bursts": {
+      "acks": {
+        "pauses": 1,
+        "median_pause_ms": 62.9
+      },
+      "debezium": {
+        "pauses": 827,
+        "median_pause_ms": 56.0
+      },
+      "kafka": {
+        "pauses": 2262,
+        "median_pause_ms": 51.0
+      },
+      "cache_a": {
+        "pauses": 623,
+        "median_pause_ms": 85.7
+      },
+      "cache_b": {
+        "pauses": 603,
+        "median_pause_ms": 84.6
+      }
+    },
+    "kafka_to_seen_a": {
+      "n": 24020,
+      "p50_ms": 48.9,
+      "p99_ms": 87.7
+    },
+    "total_a": {
+      "n": 24020,
+      "p50_ms": 83.5,
+      "p99_ms": 152.9
+    },
+    "kafka_to_seen_b": {
+      "n": 24020,
+      "p50_ms": 52.8,
+      "p99_ms": 100.5
+    },
+    "total_b": {
+      "n": 24020,
+      "p50_ms": 88.0,
+      "p99_ms": 162.4
+    }
+  }
+}

@@ -1,0 +1,76 @@
+# Side B (secondary): Kafka + MirrorMaker 2 + worker. No database access at all:
+# the only inbound data path is MirrorMaker -> PrivateLink endpoint -> A:9094.
+name: cdc-b
+
+services:
+  kafka:
+    image: apache/kafka:3.9.0
+    restart: unless-stopped
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:29093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:29093
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      # Off on purpose: MirrorMaker must create the CDC topic with A's partition count.
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "false"
+      KAFKA_LOG_DIRS: /var/lib/kafka/data
+      KAFKA_HEAP_OPTS: ${KAFKA_HEAP_OPTS:--Xmx768m -Xms384m}
+    volumes:
+      - kafka-data:/var/lib/kafka/data
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/kafka/bin/kafka-broker-api-versions.sh --bootstrap-server localhost:9092 > /dev/null 2>&1"]
+      interval: 30s        # each check starts a JVM or curl: keep the steady state cheap
+      start_period: 180s
+      start_interval: 5s
+      timeout: 25s
+      retries: 5
+
+  mm2:
+    image: apache/kafka:3.9.0
+    restart: unless-stopped
+    depends_on:
+      kafka:
+        condition: service_healthy
+    environment:
+      KAFKA_HEAP_OPTS: ${MM2_HEAP_OPTS:--Xmx512m -Xms256m}
+    entrypoint: ["/opt/kafka/bin/connect-mirror-maker.sh", "/etc/cdc/mm2.properties"]
+    volumes:
+      - ./mm2.properties:/etc/cdc/mm2.properties:ro
+      - ./secrets/kafka:/etc/kafka/secrets:ro
+
+  worker:
+    image: cdc-tools:local
+    restart: unless-stopped
+    depends_on:
+      kafka:
+        condition: service_healthy
+    environment: &worker-env
+      KAFKA_BOOTSTRAP: kafka:9092
+      CDC_TOPIC: ${TOPIC_PREFIX}.public.products
+      DLQ_TOPIC: ${TOPIC_PREFIX}.public.products.dlq
+      CDC_EPOCH: ${CDC_EPOCH}
+      CONSUME_TIMEOUT_S: ${CONSUME_TIMEOUT_S:-0.2}
+      PG_DSN: ""                      # no route to Aurora: slot monitor off
+      REDIS_HOST: ${REDIS_HOST}
+      REDIS_PORT: ${REDIS_PORT:-6379}
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+      REDIS_TLS: ${REDIS_TLS:-true}
+    command: ["python", "-m", "worker.consumer"]
+
+  tools:
+    image: cdc-tools:local
+    profiles: ["tools"]
+    environment: *worker-env
+    volumes:
+      - ./run:/run/cdc
+
+volumes:
+  kafka-data:

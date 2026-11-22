@@ -1,0 +1,9 @@
+before A: {"side":"a","cache_epoch":"0","connector":"RUNNING/RUNNING","topic":"dbserver1.public.products","slot":"debezium_slot","slots":[{"slot":"debezium_slot","active":true,"wal_status":"reserved","confirmed_flush_lsn":"0/4105768"}],"worker":"running"}
+writer cdc-poc-a-0 -> cdc-poc-a-1 after 29s
+slot debezium_slot after failover: present active=True wal_status=reserved; connector resumed without intervention: yes (111s after failover start)
+epoch 0 -> 1 on A and B
+after A: {"side":"a","cache_epoch":"1","connector":"RUNNING/RUNNING","topic":"dbserver2.public.products","slot":"debezium_slot_e1","slots":[{"slot":"debezium_slot_e1","active":true,"wal_status":"reserved","confirmed_flush_lsn":"0/410EA70"}],"worker":"running"}
+stale A: STALE_REFUSED epoch=0 rc=1
+after B: {"side":"b","cache_epoch":"1","connector":"n/a","topic":"dbserver2.public.products","slot":"debezium_slot_e1","slots":[],"worker":"running"}
+stale B: STALE_REFUSED epoch=0 rc=1
+RESULT: PASS

@@ -1,0 +1,191 @@
+{
+  "run": "soak-20261122-130934",
+  "ok": true,
+  "problems": [],
+  "failover": {
+    "mode": "failover",
+    "t_call": 1795371051.9572754,
+    "old_writer": "cdc-poc-a-1",
+    "new_writer": "cdc-poc-a-0",
+    "api_flip_s": 27.0,
+    "timeline": {
+      "first_writer_error_s": 15.39,
+      "debezium_noticed_s": 15.5,
+      "events": [
+        {
+          "s": 15.5,
+          "debezium": "ERROR Postgres|dbserver2|streaming Producer failure"
+        },
+        {
+          "s": 15.5,
+          "debezium": "WARN || Going to restart connector after 1 sec. after a retriable exception"
+        },
+        {
+          "s": 16.8,
+          "debezium": "INFO || Attempting to restart task."
+        },
+        {
+          "s": 17.3,
+          "debezium": "INFO Postgres|dbserver2|snapshot Snapshot ended with SnapshotResult status=SKIPPED"
+        },
+        {
+          "s": 17.7,
+          "debezium": "INFO Postgres|dbserver2|streaming Searching for WAL resume position"
+        },
+        {
+          "s": 17.7,
+          "debezium": "INFO Postgres|dbserver2|streaming WAL resume position 'LSN{0/4F52928}' discovered"
+        },
+        {
+          "s": 17.9,
+          "debezium": "INFO Postgres|dbserver2|streaming Processing messages"
+        }
+      ]
+    }
+  },
+  "before": {
+    "a": {
+      "side": "a",
+      "cache_epoch": "1",
+      "connector": "RUNNING/RUNNING",
+      "topic": "dbserver2.public.products",
+      "slot": "debezium_slot_e1",
+      "slots": [
+        {
+          "slot": "debezium_slot_e1",
+          "active": true,
+          "wal_status": "reserved",
+          "confirmed_flush_lsn": "0/4EB9500"
+        }
+      ],
+      "worker": "running"
+    },
+    "b": {
+      "side": "b",
+      "cache_epoch": "1",
+      "connector": "n/a",
+      "topic": "dbserver2.public.products",
+      "slot": "debezium_slot_e1",
+      "slots": [],
+      "worker": "running"
+    }
+  },
+  "after": {
+    "a": {
+      "side": "a",
+      "cache_epoch": "1",
+      "connector": "RUNNING/RUNNING",
+      "topic": "dbserver2.public.products",
+      "slot": "debezium_slot_e1",
+      "slots": [
+        {
+          "slot": "debezium_slot_e1",
+          "active": true,
+          "wal_status": "reserved",
+          "confirmed_flush_lsn": "0/513AD38"
+        }
+      ],
+      "worker": "running"
+    },
+    "b": {
+      "side": "b",
+      "cache_epoch": "1",
+      "connector": "n/a",
+      "topic": "dbserver2.public.products",
+      "slot": "debezium_slot_e1",
+      "slots": [],
+      "worker": "running"
+    }
+  },
+  "summary": {
+    "keys": 9604,
+    "acked_commits": 13400,
+    "acked_inserts": 9604,
+    "write_errors": 4,
+    "gave_up": 0,
+    "db_missing": 0,
+    "longest_write_pause_s": 1.43,
+    "duration_s": 240.1,
+    "error_window_s": 0.02,
+    "a": {
+      "keys": 9604,
+      "mismatched": 0,
+      "absent": 0,
+      "mismatched_sample": [],
+      "converge_after_last_write_s": 0.45,
+      "lag_samples": 9604,
+      "lag_p50_ms": 80.0,
+      "lag_p99_ms": 1286.5,
+      "lag_max_s": 2.25,
+      "longest_cache_pause_s": 3.59
+    },
+    "b": {
+      "keys": 9604,
+      "mismatched": 0,
+      "absent": 0,
+      "mismatched_sample": [],
+      "converge_after_last_write_s": 3.35,
+      "lag_samples": 9604,
+      "lag_p50_ms": 82.2,
+      "lag_p99_ms": 1278.5,
+      "lag_max_s": 2.25,
+      "longest_cache_pause_s": 3.6
+    }
+  },
+  "stages": {
+    "events": 9604,
+    "acked": 9604,
+    "ack_to_debezium": {
+      "n": 9604,
+      "p50_ms": 23.8,
+      "p99_ms": 1140.0
+    },
+    "debezium_to_kafka": {
+      "n": 9604,
+      "p50_ms": 26.2,
+      "p99_ms": 79.0
+    },
+    "bursts": {
+      "acks": {
+        "pauses": 5,
+        "median_pause_ms": 62.0
+      },
+      "debezium": {
+        "pauses": 4127,
+        "median_pause_ms": 56.0
+      },
+      "kafka": {
+        "pauses": 4201,
+        "median_pause_ms": 51.0
+      },
+      "cache_a": {
+        "pauses": 3384,
+        "median_pause_ms": 51.8
+      },
+      "cache_b": {
+        "pauses": 3216,
+        "median_pause_ms": 51.4
+      }
+    },
+    "kafka_to_seen_a": {
+      "n": 9604,
+      "p50_ms": 30.8,
+      "p99_ms": 65.1
+    },
+    "total_a": {
+      "n": 9604,
+      "p50_ms": 80.0,
+      "p99_ms": 1286.5
+    },
+    "kafka_to_seen_b": {
+      "n": 9604,
+      "p50_ms": 33.2,
+      "p99_ms": 58.1
+    },
+    "total_b": {
+      "n": 9604,
+      "p50_ms": 82.2,
+      "p99_ms": 1278.5
+    }
+  }
+}

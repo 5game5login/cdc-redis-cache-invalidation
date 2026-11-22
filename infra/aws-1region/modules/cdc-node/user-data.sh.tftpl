@@ -1,0 +1,54 @@
+#!/bin/bash
+set -euxo pipefail
+dnf -y install docker jq unzip amazon-cloudwatch-agent
+
+# Container logs go straight to CloudWatch (the daemon uses the instance role).
+mkdir -p /etc/docker
+cat > /etc/docker/daemon.json <<'J'
+{"log-driver": "awslogs",
+ "log-opts": {"awslogs-region": "${region}", "awslogs-group": "${log_group}", "tag": "{{.Name}}"}}
+J
+systemctl enable --now docker
+
+# Ship this boot log too, so failures are visible without a session.
+cat > /opt/aws/amazon-cloudwatch-agent/etc/boot.json <<'J'
+{"logs": {"logs_collected": {"files": {"collect_list": [
+  {"file_path": "/var/log/cloud-init-output.log", "log_group_name": "${log_group}", "log_stream_name": "cloud-init"}]}}}}
+J
+/opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -a fetch-config -m ec2 -s \
+  -c file:/opt/aws/amazon-cloudwatch-agent/etc/boot.json || true
+
+# Docker Compose plugin, pinned and checksum-verified.
+P=/usr/local/lib/docker/cli-plugins
+mkdir -p $P
+curl -fsSL --retry 5 -o $P/docker-compose \
+  https://github.com/docker/compose/releases/download/v5.8.0/docker-compose-linux-aarch64
+echo "1a9c918b2fb49b9c87f0018c64b5abd0d30715155e98dc939779fbaee6c414d3  $P/docker-compose" | sha256sum -c -
+chmod +x $P/docker-compose
+
+mkdir -p /opt/cdc
+cd /opt/cdc
+cat > node.conf <<'C'
+SIDE=${side}
+AWS_REGION=${region}
+CDC_STORE=s3://${bucket}/runs
+%{ for k, v in node_conf ~}
+${k}=${v}
+%{ endfor ~}
+C
+
+# Pull a newer bundle later with: /opt/cdc/update.sh && /opt/cdc/cdcctl.sh up
+cat > update.sh <<'U'
+#!/bin/bash
+set -euo pipefail
+aws s3 cp --quiet --region ${bucket_region} s3://${bucket}/${bundle_key} /opt/cdc/bundle.zip
+unzip -qo /opt/cdc/bundle.zip -d /opt/cdc
+chmod +x /opt/cdc/cdcctl.sh
+U
+chmod +x update.sh
+./update.sh
+
+set +x
+./cdcctl.sh fetch-secrets
+./cdcctl.sh up
+touch /opt/cdc/BOOT_OK

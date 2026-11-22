@@ -1,0 +1,143 @@
+# Side A (primary): Kafka + Debezium Connect + worker.
+# Aurora and ElastiCache are external; see .env (written by `cdcctl.sh fetch-secrets`).
+name: cdc-a
+
+services:
+  kafka:
+    image: apache/kafka:3.9.0
+    restart: unless-stopped
+    ports:
+      # The only port published on the host. Reached solely through the NLB.
+      - "${KAFKA_TLS_BIND:-0.0.0.0}:9094:9094"
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:29093,PRIVATELINK://:9094
+      # PRIVATELINK advertises a name that resolves (in VPC-B's private zone) to
+      # the interface endpoint, so MirrorMaker is never redirected to a VPC-A IP.
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PRIVATELINK://${KAFKA_PRIVATELINK_HOST}:9094
+      # Not named "SSL": the image's SSL auto-config only supports JKS + passwords.
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,PRIVATELINK:SSL
+      KAFKA_LISTENER_NAME_PRIVATELINK_SSL_KEYSTORE_TYPE: PEM
+      KAFKA_LISTENER_NAME_PRIVATELINK_SSL_KEYSTORE_LOCATION: /etc/kafka/secrets/server.pem
+      KAFKA_LISTENER_NAME_PRIVATELINK_SSL_TRUSTSTORE_TYPE: PEM
+      KAFKA_LISTENER_NAME_PRIVATELINK_SSL_TRUSTSTORE_LOCATION: /etc/kafka/secrets/ca.pem
+      KAFKA_LISTENER_NAME_PRIVATELINK_SSL_CLIENT_AUTH: required
+      # ANONYMOUS = the docker-internal listeners only; 9094 always has an mTLS
+      # principal, which gets read-only ACLs (see cdcctl.sh acls).
+      KAFKA_AUTHORIZER_CLASS_NAME: org.apache.kafka.metadata.authorizer.StandardAuthorizer
+      KAFKA_SUPER_USERS: User:ANONYMOUS
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:29093
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_NUM_PARTITIONS: 4
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+      KAFKA_LOG_DIRS: /var/lib/kafka/data
+      KAFKA_HEAP_OPTS: ${KAFKA_HEAP_OPTS:--Xmx1g -Xms512m}
+    volumes:
+      - kafka-data:/var/lib/kafka/data
+      - ./secrets/kafka:/etc/kafka/secrets:ro
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/kafka/bin/kafka-broker-api-versions.sh --bootstrap-server localhost:9092 > /dev/null 2>&1"]
+      interval: 30s        # each check starts a JVM or curl: keep the steady state cheap
+      start_period: 180s
+      start_interval: 5s
+      timeout: 25s
+      retries: 5
+
+  connect:
+    image: quay.io/debezium/connect:3.0
+    restart: unless-stopped
+    depends_on:
+      kafka:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:${CONNECT_PORT:-8083}:8083"   # unauthenticated REST: loopback only
+    environment:
+      BOOTSTRAP_SERVERS: kafka:9092
+      GROUP_ID: connect-cluster
+      CONFIG_STORAGE_TOPIC: connect_configs
+      OFFSET_STORAGE_TOPIC: connect_offsets
+      STATUS_STORAGE_TOPIC: connect_statuses
+      CONFIG_STORAGE_REPLICATION_FACTOR: 1
+      OFFSET_STORAGE_REPLICATION_FACTOR: 1
+      STATUS_STORAGE_REPLICATION_FACTOR: 1
+      KEY_CONVERTER: org.apache.kafka.connect.json.JsonConverter
+      VALUE_CONVERTER: org.apache.kafka.connect.json.JsonConverter
+      CONNECT_KEY_CONVERTER_SCHEMAS_ENABLE: "false"
+      CONNECT_VALUE_CONVERTER_SCHEMAS_ENABLE: "false"
+      # The connector config stores ${env:DB_PASSWORD}, so the password never
+      # lands in the config topic or the REST API output.
+      CONNECT_CONFIG_PROVIDERS: env
+      CONNECT_CONFIG_PROVIDERS_ENV_CLASS: org.apache.kafka.common.config.provider.EnvVarConfigProvider
+      CONNECT_CONFIG_PROVIDERS_ENV_PARAM_ALLOWLIST_PATTERN: DB_.*
+      DB_PASSWORD: ${DEBEZIUM_PASSWORD}
+      HEAP_OPTS: ${CONNECT_HEAP_OPTS:--Xmx1g -Xms512m}
+    volumes:
+      - ./secrets/pg:/etc/cdc:ro
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fs http://localhost:8083/connectors > /dev/null"]
+      interval: 30s        # each check starts a JVM or curl: keep the steady state cheap
+      start_period: 180s
+      start_interval: 5s
+      timeout: 5s
+      retries: 5
+
+  worker:
+    image: cdc-tools:local
+    restart: unless-stopped
+    depends_on:
+      kafka:
+        condition: service_healthy
+    environment: &worker-env
+      KAFKA_BOOTSTRAP: kafka:9092
+      CDC_TOPIC: ${TOPIC_PREFIX}.public.products
+      DLQ_TOPIC: ${TOPIC_PREFIX}.public.products.dlq
+      CDC_EPOCH: ${CDC_EPOCH}
+      CONSUME_TIMEOUT_S: ${CONSUME_TIMEOUT_S:-0.2}
+      SLOT_NAME: ${SLOT_NAME}
+      PG_DSN: ${MONITOR_DSN}
+      REDIS_HOST: ${REDIS_HOST}
+      REDIS_PORT: ${REDIS_PORT:-6379}
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+      REDIS_TLS: ${REDIS_TLS:-true}
+    volumes:
+      - ./secrets/pg:/etc/cdc:ro
+    command: ["python", "-m", "worker.consumer"]
+
+  # Restarts a FAILED Debezium task, only when the slot proves no events can be skipped
+  watchdog:
+    image: cdc-tools:local
+    restart: unless-stopped
+    depends_on: [connect]
+    environment:
+      CONNECT_URL: http://connect:8083
+      CONNECTOR_NAME: ${CONNECTOR_NAME}
+      SLOT_NAME: ${SLOT_NAME}
+      PG_DSN: ${MONITOR_DSN}
+    volumes:
+      - ./secrets/pg:/etc/cdc:ro
+    command: ["python", "connector_watchdog.py"]
+
+  # One-shot container for init, benchmark and checks: `docker compose run --rm tools ...`
+  tools:
+    image: cdc-tools:local
+    profiles: ["tools"]
+    environment:
+      <<: *worker-env
+      APP_DSN: ${APP_DSN}
+      SLOT_ADMIN_DSN: ${SLOT_ADMIN_DSN}
+      ADMIN_DSN: ${ADMIN_DSN:-}
+      DEBEZIUM_PASSWORD: ${DEBEZIUM_PASSWORD}
+      MONITOR_PASSWORD: ${MONITOR_PASSWORD}
+      APP_PASSWORD: ${APP_PASSWORD}
+    volumes:
+      - ./secrets/pg:/etc/cdc:ro
+      - ./run:/run/cdc
+
+volumes:
+  kafka-data:

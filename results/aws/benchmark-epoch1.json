@@ -1,0 +1,122 @@
+[
+  {
+    "run": "20261121-232514-0",
+    "ok": true,
+    "problems": [],
+    "ops": {
+      "update": 422,
+      "delete": 40,
+      "reinsert": 38,
+      "noop": 0
+    },
+    "write_duration_s": 2.96,
+    "sides": [
+      {
+        "side": "a",
+        "keys": 50,
+        "consistent": 50,
+        "mismatched": [],
+        "converge_after_last_write_s": 0.75,
+        "samples": 171,
+        "p50_ms": 525.2,
+        "p99_ms": 878.7,
+        "min_ms": 282.1,
+        "max_ms": 907.4,
+        "clock": "0.000000471 seconds slow of NTP time"
+      },
+      {
+        "side": "b",
+        "keys": 50,
+        "consistent": 50,
+        "mismatched": [],
+        "converge_after_last_write_s": 2.1,
+        "samples": 171,
+        "p50_ms": 540.0,
+        "p99_ms": 895.1,
+        "min_ms": 303.6,
+        "max_ms": 924.0,
+        "clock": "0.000000097 seconds slow of NTP time"
+      }
+    ]
+  },
+  {
+    "run": "20261121-232549-1",
+    "ok": true,
+    "problems": [],
+    "ops": {
+      "update": 422,
+      "delete": 41,
+      "reinsert": 37,
+      "noop": 0
+    },
+    "write_duration_s": 2.74,
+    "sides": [
+      {
+        "side": "a",
+        "keys": 50,
+        "consistent": 50,
+        "mismatched": [],
+        "converge_after_last_write_s": 0.34,
+        "samples": 189,
+        "p50_ms": 530.5,
+        "p99_ms": 911.8,
+        "min_ms": 321.8,
+        "max_ms": 942.6,
+        "clock": "0.000001043 seconds slow of NTP time"
+      },
+      {
+        "side": "b",
+        "keys": 50,
+        "consistent": 50,
+        "mismatched": [],
+        "converge_after_last_write_s": 2.0,
+        "samples": 189,
+        "p50_ms": 544.4,
+        "p99_ms": 925.8,
+        "min_ms": 339.5,
+        "max_ms": 957.1,
+        "clock": "0.000000718 seconds fast of NTP time"
+      }
+    ]
+  },
+  {
+    "run": "20261121-232623-2",
+    "ok": true,
+    "problems": [],
+    "ops": {
+      "update": 394,
+      "delete": 56,
+      "reinsert": 50,
+      "noop": 0
+    },
+    "write_duration_s": 2.86,
+    "sides": [
+      {
+        "side": "a",
+        "keys": 50,
+        "consistent": 50,
+        "mismatched": [],
+        "converge_after_last_write_s": 0.7,
+        "samples": 199,
+        "p50_ms": 647.6,
+        "p99_ms": 1061.7,
+        "min_ms": 373.2,
+        "max_ms": 1101.4,
+        "clock": "0.000000003 seconds slow of NTP time"
+      },
+      {
+        "side": "b",
+        "keys": 50,
+        "consistent": 50,
+        "mismatched": [],
+        "converge_after_last_write_s": 1.84,
+        "samples": 206,
+        "p50_ms": 660.8,
+        "p99_ms": 1070.6,
+        "min_ms": 388.6,
+        "max_ms": 1111.3,
+        "clock": "0.000002061 seconds slow of NTP time"
+      }
+    ]
+  }
+]

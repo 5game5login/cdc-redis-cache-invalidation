@@ -1,0 +1,156 @@
+{
+  "run": "soak-20261122-000540",
+  "ok": true,
+  "problems": [],
+  "failover": {
+    "t_call": 1795324016.2924907,
+    "old_writer": "cdc-poc-a-0",
+    "new_writer": "cdc-poc-a-1",
+    "api_flip_s": 18.7
+  },
+  "before": {
+    "a": {
+      "side": "a",
+      "cache_epoch": "1",
+      "connector": "RUNNING/RUNNING",
+      "topic": "dbserver2.public.products",
+      "slot": "debezium_slot_e1",
+      "slots": [
+        {
+          "slot": "debezium_slot_e1",
+          "active": true,
+          "wal_status": "reserved",
+          "confirmed_flush_lsn": "0/45E2378"
+        }
+      ],
+      "worker": "running"
+    },
+    "b": {
+      "side": "b",
+      "cache_epoch": "1",
+      "connector": "n/a",
+      "topic": "dbserver2.public.products",
+      "slot": "debezium_slot_e1",
+      "slots": [],
+      "worker": "running"
+    }
+  },
+  "after": {
+    "a": {
+      "side": "a",
+      "cache_epoch": "1",
+      "connector": "RUNNING/RUNNING",
+      "topic": "dbserver2.public.products",
+      "slot": "debezium_slot_e1",
+      "slots": [
+        {
+          "slot": "debezium_slot_e1",
+          "active": true,
+          "wal_status": "reserved",
+          "confirmed_flush_lsn": "0/4870C48"
+        }
+      ],
+      "worker": "running"
+    },
+    "b": {
+      "side": "b",
+      "cache_epoch": "1",
+      "connector": "n/a",
+      "topic": "dbserver2.public.products",
+      "slot": "debezium_slot_e1",
+      "slots": [],
+      "worker": "running"
+    }
+  },
+  "summary": {
+    "keys": 9604,
+    "acked_commits": 13400,
+    "acked_inserts": 9604,
+    "write_errors": 4,
+    "gave_up": 0,
+    "db_missing": 0,
+    "longest_write_pause_s": 2.26,
+    "duration_s": 240.1,
+    "error_window_s": 0.02,
+    "a": {
+      "keys": 9604,
+      "mismatched": 0,
+      "absent": 0,
+      "mismatched_sample": [],
+      "converge_after_last_write_s": 0.42,
+      "lag_samples": 9604,
+      "lag_p50_ms": 81.6,
+      "lag_p99_ms": 10641.9,
+      "lag_max_s": 10.79,
+      "longest_cache_pause_s": 12.99
+    },
+    "b": {
+      "keys": 9604,
+      "mismatched": 0,
+      "absent": 0,
+      "mismatched_sample": [],
+      "converge_after_last_write_s": 3.68,
+      "lag_samples": 9604,
+      "lag_p50_ms": 83.6,
+      "lag_p99_ms": 10648.7,
+      "lag_max_s": 10.82,
+      "longest_cache_pause_s": 13.02
+    }
+  },
+  "stages": {
+    "events": 9604,
+    "acked": 9604,
+    "ack_to_debezium": {
+      "n": 9604,
+      "p50_ms": 24.0,
+      "p99_ms": 10524.8
+    },
+    "debezium_to_kafka": {
+      "n": 9604,
+      "p50_ms": 26.5,
+      "p99_ms": 51.7
+    },
+    "bursts": {
+      "acks": {
+        "pauses": 2,
+        "median_pause_ms": 1153.7
+      },
+      "debezium": {
+        "pauses": 3984,
+        "median_pause_ms": 55.8
+      },
+      "kafka": {
+        "pauses": 4051,
+        "median_pause_ms": 51.0
+      },
+      "cache_a": {
+        "pauses": 3437,
+        "median_pause_ms": 51.1
+      },
+      "cache_b": {
+        "pauses": 3092,
+        "median_pause_ms": 51.6
+      }
+    },
+    "kafka_to_seen_a": {
+      "n": 9604,
+      "p50_ms": 31.8,
+      "p99_ms": 85.7
+    },
+    "total_a": {
+      "n": 9604,
+      "p50_ms": 81.6,
+      "p99_ms": 10641.9
+    },
+    "kafka_to_seen_b": {
+      "n": 9604,
+      "p50_ms": 33.7,
+      "p99_ms": 123.3
+    },
+    "total_b": {
+      "n": 9604,
+      "p50_ms": 83.6,
+      "p99_ms": 10648.7
+    }
+  }
+}
